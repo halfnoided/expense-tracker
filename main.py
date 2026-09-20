@@ -30,3 +30,31 @@ def add_transaction(transaction: Transaction):
     transaction_out = TransactionOut(**transaction.model_dump(), transaction_id = transaction_id_counter)
     transactions_list.append(transaction_out)
     return transaction_out
+
+@app.put("/transactions/{transaction_id}", response_model=TransactionOut)
+def update_transaction(
+    transaction_id: int,
+    updated_transaction: Transaction
+    ):
+    for index, transaction in enumerate(transactions_list):
+        if transaction.transaction_id == transaction_id:
+            transaction_out = TransactionOut(
+                **updated_transaction.model_dump(),
+                transaction_id = transaction.transaction_id)
+            transactions_list[index] = transaction_out
+            return transaction_out
+    raise HTTPException(
+        status_code=404, 
+        detail=f"Transaction with id {transaction_id} not found"
+        )
+
+@app.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: int):
+    for index, transaction in enumerate(transactions_list):
+        if transaction.transaction_id == transaction_id:
+            transactions_list.pop(index)
+            return {"detail": "Transaction deleted successfully"}
+    raise HTTPException(
+            status_code=404,
+            detail=f"Transaction with id {transaction_id} NOT deleted."
+    )
