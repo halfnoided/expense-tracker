@@ -12,3 +12,6 @@ class Transaction(BaseModel):
     description: str
     date: datetime
     category: str
+
+class TransactionOut(Transaction):
+    transaction_id: int 
