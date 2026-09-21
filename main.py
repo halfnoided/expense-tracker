@@ -1,5 +1,9 @@
 from fastapi import FastAPI, HTTPException
-from schemas import Transaction, TransactionType, TransactionOut
+from schemas import (
+    Transaction,
+    TransactionType,
+    TransactionOut
+)
 
 app = FastAPI()
 transactions_list = []
@@ -7,11 +11,21 @@ transaction_id_counter = 0 # if 0 transactions presented, its count is 0.
 
 @app.get("/")
 def get_app():
-    return {"message":"hey"}
+    return {"message":"hello"}
 
 @app.get("/transactions")
 def get_transactions():
     return transactions_list
+
+@app.get("/transactions/summary")
+def get_summary_by_categories():
+    sum_by_categories = dict()
+    for transaction in transactions_list:
+        if transaction.transaction_type == TransactionType.income:
+            sum_by_categories[transaction.category] = sum_by_categories.get(transaction.category, 0) + transaction.value
+        elif transaction.transaction_type == TransactionType.expense:
+            sum_by_categories[transaction.category] = sum_by_categories.get(transaction.category, 0) - transaction.value
+    return sum_by_categories
 
 @app.get("/transactions/{transaction_id}")
 def get_transaction(transaction_id: int):
