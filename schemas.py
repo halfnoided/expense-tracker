@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from enum import Enum
 
@@ -14,4 +14,4 @@ class Transaction(BaseModel):
     category: str
 
 class TransactionOut(Transaction):
-    transaction_id: int 
+    id: int 

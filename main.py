@@ -1,11 +1,17 @@
 from fastapi import FastAPI, HTTPException
+from sqlalchemy import select
 from schemas import (
     Transaction,
     TransactionType,
     TransactionOut
 )
+from models import TransactionDB
+from database import engine, SessionLocal, Base
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
 transactions_list = []
 transaction_id_counter = 0 # if 0 transactions presented, its count is 0. 
 
@@ -15,7 +21,10 @@ def get_app():
 
 @app.get("/transactions")
 def get_transactions():
-    return transactions_list
+    with SessionLocal() as session:
+        result = session.execute(select(TransactionDB)
+            .order_by(TransactionDB.id))
+        return result.scalars().all()
 
 @app.get("/transactions/summary")
 def get_summary_by_categories():
@@ -39,11 +48,12 @@ def get_transaction(transaction_id: int):
 
 @app.post("/transactions", response_model=TransactionOut)
 def add_transaction(transaction: Transaction):
-    global transaction_id_counter
-    transaction_id_counter += 1
-    transaction_out = TransactionOut(**transaction.model_dump(), transaction_id = transaction_id_counter)
-    transactions_list.append(transaction_out)
-    return transaction_out
+    transaction_db = TransactionDB(**transaction.model_dump())
+    with SessionLocal() as session:
+        session.add(transaction_db)
+        session.commit()
+        session.refresh(transaction_db)
+        return transaction_db
 
 @app.put("/transactions/{transaction_id}", response_model=TransactionOut)
 def update_transaction(
