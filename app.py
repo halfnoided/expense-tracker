@@ -9,6 +9,7 @@ from schemas import (
     TransactionOut
 )
 from database import SessionLocal
+from models import TransactionDB
 
 app = FastAPI()
 
