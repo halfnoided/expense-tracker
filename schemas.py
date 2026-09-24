@@ -1,4 +1,8 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    NonNegativeFloat,
+)
 from datetime import datetime
 from enum import Enum
 
@@ -8,10 +12,11 @@ class TransactionType(str, Enum):
 
 class Transaction(BaseModel):
     transaction_type: TransactionType
-    value: float
+    value: NonNegativeFloat
     description: str
     date: datetime
     category: str
 
 class TransactionOut(Transaction):
-    id: int 
+    model_config = ConfigDict(from_attributes=True)
+    id: int
